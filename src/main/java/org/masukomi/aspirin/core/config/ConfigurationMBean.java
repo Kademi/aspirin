@@ -28,7 +28,6 @@ public interface ConfigurationMBean {
 	public static final String PARAM_LOGGER_PREFIX					= "aspirin.logger.prefix";
 	public static final String PARAM_POSTMASTER_EMAIL				= "aspirin.postmaster.email";
 	public static final String PARAM_MAILSTORE_CLASS				= "aspirin.mailstore.class";
-	public static final String PARAM_QUEUESTORE_CLASS				= "aspirin.queuestore.class";
 	
 	/**
 	 * Value of never expiration. If an email expire is marked with this value, 
@@ -82,11 +81,7 @@ public interface ConfigurationMBean {
 	 * @return The email address of the postmaster.
 	 */
 	public String getPostmasterEmail();
-	/**
-	 * @return The directory object's class name where the email informations 
-	 * could be stored.
-	 */
-	public String getQueueStoreClassName();
+    
 	/**
 	 * @return The hostname of this server. It is used in HELO SMTP command.
 	 */
@@ -150,18 +145,7 @@ public interface ConfigurationMBean {
 	 * @param expiry The default expiry time. 
 	 */
 	public void setExpiry(long expiry);
-	/**
-	 * If you have got an own logger, you can set up a logger name, which is 
-	 * used in your system. 
-	 * @param loggerName The name of your logger.
-	 */
-	public void setLoggerName(String loggerName);
-	/**
-	 * Set the logger prefix, which will be appended to the start of log 
-	 * entries.
-	 * @param loggerPrefix The prefix string.
-	 */
-	public void setLoggerPrefix(String loggerPrefix);
+
 	/**
 	 * Set the mail store class name, where MimeMessages will be stored. 
 	 * Built-in stores are {@link SimpleMailStore} and {@link FileMailStore}.
@@ -174,12 +158,7 @@ public interface ConfigurationMBean {
 	 * @param emailAddress The email address of postmaster.
 	 */
 	public void setPostmasterEmail(String emailAddress);
-	/**
-	 * Set the queue store class name, where queue informations are placed in. 
-	 * Built-in store is the {@link SimpleQueueStore}.
-	 * @param className
-	 */
-	public void setQueueStoreClassName(String className);
+    
 	/**
 	 * Set the hostname, which is used in HELO command of SMTP communication. 
 	 * This hostname identifies us for other hosts. If the hostname is invalid 

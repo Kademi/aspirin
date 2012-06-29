@@ -33,11 +33,8 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.ParseException;
 
-import org.masukomi.aspirin.core.AspirinInternal;
 import org.masukomi.aspirin.core.store.mail.MailStore;
 import org.masukomi.aspirin.core.store.mail.SimpleMailStore;
-import org.masukomi.aspirin.core.store.queue.QueueStore;
-import org.masukomi.aspirin.core.store.queue.SimpleQueueStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -163,24 +160,16 @@ import org.slf4j.LoggerFactory;
  */
 public class Configuration implements ConfigurationMBean {
 	
-	private static volatile Configuration instance;
+    private static final Logger log = LoggerFactory.getLogger(Configuration.class);
+    	
 	private Map<String, Object> configParameters = new HashMap<String, Object>();
-	private static Logger log = null; // inherited from aspirin.logger.name
 	private MailStore mailStore = null;
-	private QueueStore queueStore = null;
 	protected InternetAddress postmaster = null; // inherited from aspirin.postmaster.email
 	private Session mailSession = null;
 	
 	private List<ConfigurationChangeListener> listeners;
 	private Object listenerLock = new Object();
 
-	static public Configuration getInstance() {
-		if (instance == null) {
-			instance = new Configuration();
-		}
-		return instance;
-	}
-	
 	public void init(Properties props) {
 		
 		List<Parameter> parameterList = new ArrayList<Configuration.Parameter>();
@@ -198,7 +187,6 @@ public class Configuration implements ConfigurationMBean {
 		parameterList.add(new Parameter(PARAM_LOGGER_PREFIX,				"Aspirin ",		Parameter.TYPE_STRING));
 		parameterList.add(new Parameter(PARAM_MAILSTORE_CLASS,				SimpleMailStore.class.getCanonicalName(),	Parameter.TYPE_STRING));
 		parameterList.add(new Parameter(PARAM_POSTMASTER_EMAIL,				null,			Parameter.TYPE_STRING));
-		parameterList.add(new Parameter(PARAM_QUEUESTORE_CLASS,				SimpleQueueStore.class.getCanonicalName(),	Parameter.TYPE_STRING));
 		
 		for( Parameter param : parameterList )
 		{
@@ -207,7 +195,6 @@ public class Configuration implements ConfigurationMBean {
 				configParameters.put(param.getName(), o);
 		}
 		
-		log = LoggerFactory.getLogger((String)configParameters.get(PARAM_LOGGER_NAME));
 		setPostmasterEmail((String)configParameters.get(PARAM_POSTMASTER_EMAIL));
 		updateMailSession();
 	}
@@ -215,7 +202,7 @@ public class Configuration implements ConfigurationMBean {
 	/**
 	 *  
 	 */
-	Configuration() {
+	public Configuration() {
 		init(new Properties());
 	}
 	/**
@@ -224,17 +211,21 @@ public class Configuration implements ConfigurationMBean {
 	public InternetAddress getPostmaster() {
 		return postmaster;
 	}
+    @Override
 	public String getHostname() {
 		return (String)configParameters.get(PARAM_HOSTNAME);
 	}
+    @Override
 	public void setHostname(String hostname) {
 		configParameters.put(PARAM_HOSTNAME, hostname);
 		updateMailSession();
 		notifyListeners(PARAM_HOSTNAME);
 	}
+    @Override
 	public String getEncoding() {
 		return (String)configParameters.get(PARAM_ENCODING);
 	}
+    @Override
 	public void setEncoding(String encoding) {
 		configParameters.put(PARAM_ENCODING, encoding);
 //		this.encoding = encoding;
@@ -305,22 +296,7 @@ public class Configuration implements ConfigurationMBean {
 		return postmaster.toString();
 	}
 	
-	public QueueStore getQueueStore() {
-		if( queueStore == null )
-		{
-			String queueStoreClassName = (String)configParameters.get(PARAM_QUEUESTORE_CLASS);
-			try {
-				Class<?> storeClass = (Class<?>) Class.forName(queueStoreClassName);
-				if( storeClass.getInterfaces()[0].equals(QueueStore.class) )
-					queueStore = (QueueStore)storeClass.newInstance();
-			} catch (Exception e) {
-				log.error(getClass().getSimpleName()+" Queue store class could not be instantiated. Class="+queueStoreClassName, e);
-				queueStore = new SimpleQueueStore();
-			}
-		}
-		return queueStore;
-	}
-	
+
 	@Override
 	public boolean isDeliveryBounceOnFailure() {
 		return (Boolean)configParameters.get(PARAM_DELIVERY_BOUNCE_ON_FAILURE);
@@ -384,20 +360,6 @@ public class Configuration implements ConfigurationMBean {
 		notifyListeners(PARAM_DELIVERY_EXPIRY);
 	}
 
-	@Override
-	public void setLoggerName(String loggerName) {
-		configParameters.put(PARAM_LOGGER_NAME, loggerName);
-//		Configuration.loggerName = loggerName;
-		log = LoggerFactory.getLogger(loggerName);
-		notifyListeners(PARAM_LOGGER_NAME);
-	}
-
-	@Override
-	public void setLoggerPrefix(String loggerPrefix) {
-		configParameters.put(PARAM_LOGGER_PREFIX, loggerPrefix);
-//		this.loggerPrefix = loggerPrefix;
-		notifyListeners(PARAM_LOGGER_PREFIX);
-	}
 	
 	public void setMailStore(MailStore mailStore) {
 		this.mailStore = mailStore;
@@ -421,10 +383,6 @@ public class Configuration implements ConfigurationMBean {
 		}
 	}
 	
-	public void setQueueStore(QueueStore queueStore) {
-		this.queueStore = queueStore;
-		notifyListeners(PARAM_QUEUESTORE_CLASS);
-	}
 	
 	public void addListener(ConfigurationChangeListener listener) {
 		if( listeners == null )
@@ -468,23 +426,7 @@ public class Configuration implements ConfigurationMBean {
 //		this.mailStoreClassName = className;
 	}
 	
-	@Override
-	public String getQueueStoreClassName() {
-		return (String)configParameters.get(PARAM_QUEUESTORE_CLASS);
-	}
-	
-	@Override
-	public void setQueueStoreClassName(String className) {
-		configParameters.put(PARAM_QUEUESTORE_CLASS, className);
-		queueStore = null;
-		notifyListeners(PARAM_QUEUESTORE_CLASS);
-//		this.queueStoreClassName = className;
-	}
-	
-	public Logger getLogger() {
-		return LoggerFactory.getLogger((String)configParameters.get(PARAM_LOGGER_PREFIX));
-	}
-	
+		
 	public Session getMailSession() {
 		return Session.getInstance(mailSession.getProperties());
 	}
@@ -513,8 +455,9 @@ public class Configuration implements ConfigurationMBean {
 		Session newSession = Session.getInstance(mailSessionProps);
 		
 		// Set communication debug
-		if( ( AspirinInternal.getLogger() == null || AspirinInternal.getLogger().isDebugEnabled() ) && isDeliveryDebug() )
+		if( log.isTraceEnabled() ) {
 			newSession.setDebug(true);
+        }
 		
 		mailSession = newSession;
 	}

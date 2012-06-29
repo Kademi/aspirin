@@ -8,6 +8,9 @@ import java.util.Vector;
 import javax.mail.URLName;
 
 import org.masukomi.aspirin.core.AspirinInternal;
+import org.masukomi.aspirin.core.Helper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.MXRecord;
 import org.xbill.DNS.Record;
@@ -23,6 +26,8 @@ import org.xbill.DNS.Type;
  */
 public class DnsResolver {
 	
+    private static final Logger log = LoggerFactory.getLogger(DnsResolver.class);
+    
 	public static final String SMTP_PROTOCOL_PREFIX = "smtp://";
 	
 	/**
@@ -124,7 +129,7 @@ public class DnsResolver {
 			}
 
 		} catch (TextParseException e) {
-			AspirinInternal.getConfiguration().getLogger().warn("DnsResolver.getMXRecordsForHost(): Failed get MX record for host '"+hostName+"'.",e);
+			log.warn("DnsResolver.getMXRecordsForHost(): Failed get MX record for host '"+hostName+"'.",e);
 		}
 
 		return recordsColl;

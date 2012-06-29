@@ -17,6 +17,10 @@ import org.masukomi.aspirin.core.AspirinInternal;
 import org.masukomi.aspirin.core.store.queue.DeliveryState;
 
 import com.sun.mail.smtp.SMTPTransport;
+import org.masukomi.aspirin.core.Helper;
+import org.masukomi.aspirin.core.config.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -25,11 +29,21 @@ import com.sun.mail.smtp.SMTPTransport;
  */
 public class SendMessage implements DeliveryHandler {
 
+    private static final Logger log = LoggerFactory.getLogger(SendMessage.class);
+    
+    private final Configuration configuration;
+    
+    public SendMessage(Configuration configuration) {
+        this.configuration = configuration;
+    }
+
+    
+    
 	@Override
 	public void handle(DeliveryContext dCtx) throws DeliveryException {
 		// Collect sending informations
 		Collection<URLName> targetServers = dCtx.getContextVariable("targetservers");
-		Session session = AspirinInternal.getConfiguration().getMailSession();
+		Session session = configuration.getMailSession();
 		MimeMessage message = dCtx.getMessage();
 		
 		// Prepare and send
@@ -45,7 +59,7 @@ public class SendMessage implements DeliveryHandler {
 		{
 			try {
 				URLName outgoingMailServer = urlnIt.next();
-				AspirinInternal.getLogger().debug("SendMessage.handle(): Attempting delivery of '{}' to recipient '{}' on host '{}' ",new Object[]{dCtx.getQueueInfo().getMailid(),dCtx.getQueueInfo().getRecipient(),outgoingMailServer});
+				log.debug("SendMessage.handle(): Attempting delivery of '{}' to recipient '{}' on host '{}' ",new Object[]{dCtx.getQueueInfo().getMailid(),dCtx.getQueueInfo().getRecipient(),outgoingMailServer});
 				Properties props = session.getProperties();
 				if (message.getSender() == null) {
 					props.put("mail.smtp.from", "<>");
@@ -64,7 +78,7 @@ public class SendMessage implements DeliveryHandler {
 							String response = ((SMTPTransport)transport).getLastServerResponse();
 							if( response != null )
 							{
-								AspirinInternal.getLogger().error("SendMessage.handle(): Last server response: {}.",response);
+								log.error("SendMessage.handle(): Last server response: {}.",response);
 								dCtx.getQueueInfo().setResultInfo(response);
 							}
 						}
@@ -72,7 +86,7 @@ public class SendMessage implements DeliveryHandler {
 						/* Catch on connection error only. */
 						if( resolveException(me) instanceof ConnectException )
 						{
-							AspirinInternal.getLogger().error("SendMessage.handle(): Connection failed.",me);
+							log.error("SendMessage.handle(): Connection failed.",me);
 							if( !urlnIt.hasNext() )
 								throw me;
 							else
@@ -83,7 +97,7 @@ public class SendMessage implements DeliveryHandler {
 							throw me;
 						}
 					}
-					AspirinInternal.getLogger().debug("SendMessage.handle(): Mail '{}' sent successfully to '{}'.",new Object[]{dCtx.getQueueInfo().getMailid(),outgoingMailServer});
+					log.debug("SendMessage.handle(): Mail '{}' sent successfully to '{}'.",new Object[]{dCtx.getQueueInfo().getMailid(),outgoingMailServer});
 					sentSuccessfully = true;
 					dCtx.addContextVariable("newstate", DeliveryState.SENT);
 				} finally {

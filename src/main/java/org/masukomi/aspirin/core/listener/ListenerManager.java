@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 
 import org.masukomi.aspirin.core.AspirinInternal;
+import org.masukomi.aspirin.core.delivery.DeliveryMaintenanceThread;
+import org.masukomi.aspirin.core.delivery.DeliveryManager;
 import org.masukomi.aspirin.core.store.queue.DeliveryState;
 import org.masukomi.aspirin.core.store.queue.QueueInfo;
 
@@ -15,6 +17,21 @@ import org.masukomi.aspirin.core.store.queue.QueueInfo;
  */
 public class ListenerManager {
 	private List<AspirinListener> listenerList = new ArrayList<AspirinListener>();
+    private DeliveryManager deliveryManager;
+
+    public ListenerManager() {
+    }
+
+    public void setDeliveryManager(DeliveryManager deliveryManager) {
+        this.deliveryManager = deliveryManager;
+    }
+
+    public DeliveryManager getDeliveryManager() {
+        return deliveryManager;
+    }
+    
+    
+        
 	
 	public void add(AspirinListener listener) {
 		synchronized (listenerList) {
@@ -41,7 +58,7 @@ public class ListenerManager {
 				else
 				if( qi.hasState(DeliveryState.SENT) )
 					listener.delivered(qi.getMailid(), qi.getRecipient(), ResultState.SENT, qi.getResultInfo());
-				if( AspirinInternal.getDeliveryManager().isCompleted(qi) )
+				if( deliveryManager.isCompleted(qi) )
 					listener.delivered(qi.getMailid(), qi.getRecipient(), ResultState.FINISHED, qi.getResultInfo());
 			}
 		}

@@ -22,19 +22,19 @@ public class MS {
 
 	public static void main(String[] args) {
 		try {
-			System.out.println("starting");
-			MimeMessage message = AspirinInternal.createNewMimeMessage();
-
-			message.setFrom(new InternetAddress(
-					"jUnit-aspirin-test@masukomi.org"));
-			message.addRecipient(Message.RecipientType.TO, new InternetAddress(
-					"aspirin-test@masukomi.org"));
-			message.setSubject("Aspirin - test to show it doesn't shut down");
-			message.setText("This is the text");
-			Aspirin.add(message);
-			System.out.println("queing mail");
-			Aspirin.shutdown();
-			System.out.println("shutting down");
+//			System.out.println("starting");
+//			MimeMessage message = AspirinInternal.createNewMimeMessage();
+//
+//			message.setFrom(new InternetAddress(
+//					"jUnit-aspirin-test@masukomi.org"));
+//			message.addRecipient(Message.RecipientType.TO, new InternetAddress(
+//					"aspirin-test@masukomi.org"));
+//			message.setSubject("Aspirin - test to show it doesn't shut down");
+//			message.setText("This is the text");
+//			Aspirin.add(message);
+//			System.out.println("queing mail");
+//			Aspirin.shutdown();
+//			System.out.println("shutting down");
 
 			
 		} catch (Exception ex) {

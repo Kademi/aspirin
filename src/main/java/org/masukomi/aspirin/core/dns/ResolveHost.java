@@ -5,9 +5,12 @@ import java.util.Collection;
 import javax.mail.URLName;
 
 import org.masukomi.aspirin.core.AspirinInternal;
+import org.masukomi.aspirin.core.Helper;
 import org.masukomi.aspirin.core.delivery.DeliveryContext;
 import org.masukomi.aspirin.core.delivery.DeliveryException;
 import org.masukomi.aspirin.core.delivery.DeliveryHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This delivery handler resolve recipient's MX records and append them to the 
@@ -22,6 +25,8 @@ import org.masukomi.aspirin.core.delivery.DeliveryHandler;
  */
 public class ResolveHost implements DeliveryHandler {
 
+    private static final Logger log = LoggerFactory.getLogger(ResolveHost.class);
+    
 	@Override
 	public void handle(DeliveryContext dCtx) throws DeliveryException {
 		String currentRecipient = dCtx.getQueueInfo().getRecipient();
@@ -37,15 +42,15 @@ public class ResolveHost implements DeliveryHandler {
              */
 			if( targetServers == null || targetServers.size() == 0 )
             {
-                AspirinInternal.getLogger().warn("ResolveHost.handle(): No mail server found for: '{}'.",new Object[]{host});
+                log.warn("ResolveHost.handle(): No mail server found for: '{}'.",new Object[]{host});
                 throw new DeliveryException("No MX record found. Temporary failure, trying again.", false);
             }
-           	AspirinInternal.getLogger().trace("ResolveHost.handle(): {} servers found for '{}'.",new Object[]{targetServers.size(),host});
+           	log.trace("ResolveHost.handle(): {} servers found for '{}'.",new Object[]{targetServers.size(),host});
            	dCtx.addContextVariable("targetservers", targetServers);
 		} catch( DeliveryException de ) {
 			throw de;
 		} catch (Exception e) {
-			AspirinInternal.getLogger().error("ResolveHost.handle(): Could not get MX for host '"+host+"' defined by recipient '"+currentRecipient+"'.",e);
+			log.error("ResolveHost.handle(): Could not get MX for host '"+host+"' defined by recipient '"+currentRecipient+"'.",e);
 			throw new DeliveryException("No MX record found. Temporary failure, trying again.", false);
 		}
 

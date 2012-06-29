@@ -1,3 +1,6 @@
+#Milton forked version of aspirin
+Forked to refactor to allow spring configuration, and notifications of mail attempts, etc
+
 # Aspirin, because sending mail shouldn't be a headache. #
 
 ## What is it? ##
