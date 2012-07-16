@@ -15,7 +15,6 @@ import org.masukomi.aspirin.core.AspirinInternal;
 import org.masukomi.aspirin.core.Helper;
 import org.masukomi.aspirin.core.config.Configuration;
 import org.masukomi.aspirin.core.config.ConfigurationChangeListener;
-import org.masukomi.aspirin.core.config.ConfigurationMBean;
 import org.masukomi.aspirin.core.dns.ResolveHost;
 import org.masukomi.aspirin.core.store.mail.MailStore;
 import org.masukomi.aspirin.core.store.queue.DeliveryState;
@@ -34,9 +33,8 @@ public final class DeliveryManager extends Thread implements ConfigurationChange
 
     private static final Logger log = LoggerFactory.getLogger(DeliveryManager.class);
     private final Configuration configuration;
-    private MailStore mailStore;
+    private final MailStore mailStore;
     private final QueueStore queueStore;
-    private DeliveryMaintenanceThread maintenanceThread;
     private Object mailingLock = new Object();
     private ObjectPool deliveryThreadObjectPool = null;
     private boolean running = false;
@@ -47,6 +45,7 @@ public final class DeliveryManager extends Thread implements ConfigurationChange
     public DeliveryManager(Configuration configuration, QueueStore queueStore, MailStore mailStore) {
         this.configuration = configuration;
         this.helper = new Helper(configuration);
+        this.mailStore = mailStore;
         // Set up default objects.
         this.setName("Aspirin-" + getClass().getSimpleName() + "-" + getId());
 
@@ -75,9 +74,6 @@ public final class DeliveryManager extends Thread implements ConfigurationChange
         mailStore = configuration.getMailStore();
         mailStore.init();
 
-        maintenanceThread = new DeliveryMaintenanceThread(queueStore, mailStore);
-        maintenanceThread.start();
-
         // Set up deliveryhandlers
         // TODO create by configuration
         deliveryHandlers.put(SendMessage.class.getCanonicalName(), new SendMessage(configuration));
@@ -98,6 +94,9 @@ public final class DeliveryManager extends Thread implements ConfigurationChange
     }
 
     public MimeMessage get(QueueInfo qi) {
+        if( qi == null ) {
+            throw new RuntimeException("queue info object is null");
+        }
         return mailStore.get(qi.getMailid());
     }
 
@@ -176,6 +175,8 @@ public final class DeliveryManager extends Thread implements ConfigurationChange
                 }
 
             } catch (Throwable t) {
+                log.error("Exception polling for messages", t);
+                System.out.println("----");
                 if (qi != null) {
                     release(qi);
                 }
@@ -216,15 +217,7 @@ public final class DeliveryManager extends Thread implements ConfigurationChange
 
     @Override
     public void configChanged(String parameterName) {
-        synchronized (mailingLock) {
-            if (parameterName.equals(Configuration.PARAM_MAILSTORE_CLASS)) {
-                mailStore = configuration.getMailStore();
-            } else if (parameterName.equals(ConfigurationMBean.PARAM_DELIVERY_THREADS_ACTIVE_MAX)) {
-                ((GenericObjectPool) deliveryThreadObjectPool).setMaxActive(configuration.getDeliveryThreadsActiveMax());
-            } else if (parameterName.equals(ConfigurationMBean.PARAM_DELIVERY_THREADS_IDLE_MAX)) {
-                ((GenericObjectPool) deliveryThreadObjectPool).setMaxIdle(configuration.getDeliveryThreadsIdleMax());
-            }
-        }
+
     }
 
     public DeliveryHandler getDeliveryHandler(String handlerName) {
@@ -239,6 +232,5 @@ public final class DeliveryManager extends Thread implements ConfigurationChange
         } catch (Exception e) {
             log.error("DeliveryManager.shutdown() failed.", e);
         }
-        maintenanceThread.shutdown();
     }
 }

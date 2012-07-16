@@ -62,6 +62,12 @@ public class AspirinInternal {
         helper = new Helper(configuration);
     }
 
+    public void start() {
+        if (!deliveryManager.isAlive()) {
+            deliveryManager.start();
+        }        
+    }
+    
     /**
      * You can get configuration object, which could be changed to set up new
      * values. Please use this method to set up your Aspirin instance. Of course

@@ -23,114 +23,109 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
+ *
  * @author Laszlo Solova
  *
  */
 public class SendMessage implements DeliveryHandler {
 
     private static final Logger log = LoggerFactory.getLogger(SendMessage.class);
-    
     private final Configuration configuration;
-    
+
     public SendMessage(Configuration configuration) {
         this.configuration = configuration;
     }
 
-    
-    
-	@Override
-	public void handle(DeliveryContext dCtx) throws DeliveryException {
-		// Collect sending informations
-		Collection<URLName> targetServers = dCtx.getContextVariable("targetservers");
-		Session session = configuration.getMailSession();
-		MimeMessage message = dCtx.getMessage();
-		
-		// Prepare and send
-		Iterator<URLName> urlnIt = targetServers.iterator();
-		InternetAddress[] addr;
-		try {
-			addr = new InternetAddress[]{new InternetAddress(dCtx.getQueueInfo().getRecipient())};
-		} catch (AddressException e) {
-			throw new DeliveryException("Recipient could not be parsed:"+dCtx.getQueueInfo().getRecipient(), true, e);
-		}
-		boolean sentSuccessfully = false;
-		while ( !sentSuccessfully && urlnIt.hasNext() )
-		{
-			try {
-				URLName outgoingMailServer = urlnIt.next();
-				log.debug("SendMessage.handle(): Attempting delivery of '{}' to recipient '{}' on host '{}' ",new Object[]{dCtx.getQueueInfo().getMailid(),dCtx.getQueueInfo().getRecipient(),outgoingMailServer});
-				Properties props = session.getProperties();
-				if (message.getSender() == null) {
-					props.put("mail.smtp.from", "<>");
-				} else {
-					String sender = message.getSender().toString();
-					props.put("mail.smtp.from", sender);
-				}
-				Transport transport = null;
- 				try {
-					transport = session.getTransport(outgoingMailServer);
-					try {
-						transport.connect();
-						transport.sendMessage(message, addr);
-						if( transport instanceof SMTPTransport )
-						{
-							String response = ((SMTPTransport)transport).getLastServerResponse();
-							if( response != null )
-							{
-								log.error("SendMessage.handle(): Last server response: {}.",response);
-								dCtx.getQueueInfo().setResultInfo(response);
-							}
-						}
-					} catch (MessagingException me) {
-						/* Catch on connection error only. */
-						if( resolveException(me) instanceof ConnectException )
-						{
-							log.error("SendMessage.handle(): Connection failed.",me);
-							if( !urlnIt.hasNext() )
-								throw me;
-							else
-								continue;
-						}
-						else
-						{
-							throw me;
-						}
-					}
-					log.debug("SendMessage.handle(): Mail '{}' sent successfully to '{}'.",new Object[]{dCtx.getQueueInfo().getMailid(),outgoingMailServer});
-					sentSuccessfully = true;
-					dCtx.addContextVariable("newstate", DeliveryState.SENT);
-				} finally {
-					if (transport != null) {
-						transport.close();
-						transport = null;
-					}
-				}
-			} catch (MessagingException me) {
-				String exMessage = resolveException(me).getMessage();
-				if( '5' == exMessage.charAt(0) )
-					throw new DeliveryException(exMessage, true);
-				else
-					throw new DeliveryException(exMessage, false);
-			} // end catch
-		} // end while
-		if( !sentSuccessfully )
-			throw new DeliveryException("SendMessage.handle(): Mail '{}' sending failed, try later.", false);
-	}
+    @Override
+    public void handle(DeliveryContext dCtx) throws DeliveryException {
+        // Collect sending informations
+        Collection<URLName> targetServers = dCtx.getContextVariable("targetservers");
+        Session session = configuration.getMailSession();
+        MimeMessage message = dCtx.getMessage();
 
-	private Exception resolveException(MessagingException msgExc) {
-		MessagingException me = msgExc;
-		Exception nextException = null;
-		Exception lastException = msgExc;
-		while( (nextException = me.getNextException()) != null )
-		{
-			lastException = nextException;
-			if( MessagingException.class.getCanonicalName().equals(nextException.getClass().getCanonicalName()) )
-				me = (MessagingException)nextException;
-			else
-				break;
-		}
-		return lastException;
-	}
+        // Prepare and send
+        Iterator<URLName> urlnIt = targetServers.iterator();
+        InternetAddress[] addr;
+        try {
+            addr = new InternetAddress[]{new InternetAddress(dCtx.getQueueInfo().getRecipient())};
+        } catch (AddressException e) {
+            throw new DeliveryException("Recipient could not be parsed:" + dCtx.getQueueInfo().getRecipient(), true, e);
+        }
+        boolean sentSuccessfully = false;
+        while (!sentSuccessfully && urlnIt.hasNext()) {
+            try {
+                URLName outgoingMailServer = urlnIt.next();
+                log.debug("SendMessage.handle(): Attempting delivery of '{}' to recipient '{}' on host '{}' ", new Object[]{dCtx.getQueueInfo().getMailid(), dCtx.getQueueInfo().getRecipient(), outgoingMailServer});
+                Properties props = session.getProperties();
+                if (message.getSender() == null) {
+                    props.put("mail.smtp.from", "<>");
+                } else {
+                    String sender = message.getSender().toString();
+                    props.put("mail.smtp.from", sender);
+                }
+                Transport transport = null;
+                try {
+                    transport = session.getTransport(outgoingMailServer);
+                    try {
+                        transport.connect();
+                        transport.sendMessage(message, addr);
+                        if (transport instanceof SMTPTransport) {
+                            String response = ((SMTPTransport) transport).getLastServerResponse();
+                            if (response != null) {
+                                log.error("SendMessage.handle(): Last server response: {}.", response);
+                                dCtx.getQueueInfo().setResultInfo(response);
+                            }
+                        }
+                    } catch (MessagingException me) {
+                        /*
+                         * Catch on connection error only.
+                         */
+                        if (resolveException(me) instanceof ConnectException) {
+                            log.error("SendMessage.handle(): Connection failed.", me);
+                            if (!urlnIt.hasNext()) {
+                                throw me;
+                            } else {
+                                continue;
+                            }
+                        } else {
+                            throw me;
+                        }
+                    }
+                    log.debug("SendMessage.handle(): Mail '{}' sent successfully to '{}'.", new Object[]{dCtx.getQueueInfo().getMailid(), outgoingMailServer});
+                    sentSuccessfully = true;
+                    dCtx.addContextVariable("newstate", DeliveryState.SENT);
+                } finally {
+                    if (transport != null) {
+                        transport.close();
+                        transport = null;
+                    }
+                }
+            } catch (MessagingException me) {
+                String exMessage = resolveException(me).getMessage();
+                if ('5' == exMessage.charAt(0)) {
+                    throw new DeliveryException(exMessage, true);
+                } else {
+                    throw new DeliveryException(exMessage, false);
+                }
+            } // end catch
+        } // end while
+        if (!sentSuccessfully) {
+            throw new DeliveryException("SendMessage.handle(): Mail '{}' sending failed, try later.", false);
+        }
+    }
 
+    private Exception resolveException(MessagingException msgExc) {
+        MessagingException me = msgExc;
+        Exception nextException = null;
+        Exception lastException = msgExc;
+        while ((nextException = me.getNextException()) != null) {
+            lastException = nextException;
+            if (MessagingException.class.getCanonicalName().equals(nextException.getClass().getCanonicalName())) {
+                me = (MessagingException) nextException;
+            } else {
+                break;
+            }
+        }
+        return lastException;
+    }
 }
