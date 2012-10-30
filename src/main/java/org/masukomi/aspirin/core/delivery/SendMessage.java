@@ -68,11 +68,15 @@ public class SendMessage implements DeliveryHandler {
                     transport = session.getTransport(outgoingMailServer);
                     try {
                         transport.connect();
+                        for( InternetAddress add : addr) {
+                            log.info("sendMessage to: " + add.getAddress());
+                        }                        
                         transport.sendMessage(message, addr);
                         if (transport instanceof SMTPTransport) {
                             String response = ((SMTPTransport) transport).getLastServerResponse();
                             if (response != null) {
                                 log.error("SendMessage.handle(): Last server response: {}.", response);
+                                System.out.println("server response: " + response);
                                 dCtx.getQueueInfo().setResultInfo(response);
                             }
                         }
@@ -102,6 +106,7 @@ public class SendMessage implements DeliveryHandler {
                 }
             } catch (MessagingException me) {
                 String exMessage = resolveException(me).getMessage();
+                System.out.println("SendMessage: messaging exception: " + exMessage);
                 if ('5' == exMessage.charAt(0)) {
                     throw new DeliveryException(exMessage, true);
                 } else {

@@ -157,17 +157,18 @@ public final class DeliveryManager extends Thread implements ConfigurationChange
                         log.error("DeliveryManager.run(): Failed borrow delivery thread object.", e);
                         release(qi);
                     }
+                    
                 } else {
-                    if (log.isTraceEnabled() && 0 < queueStore.size()) {
-                        log.trace("DeliveryManager.run(): There is no sendable item in the queue. Fallback to waiting state for a minute.");
-                    }
+//                    if (log.isTraceEnabled() && 0 < queueStore.size()) {
+//                        log.trace("DeliveryManager.run(): There is no sendable item in the queue. Fallback to waiting state for a minute.");
+//                    }
                     synchronized (this) {
                         try {
                             /*
                              * We should wait for a specified time, because some
                              * emails unsent could be sendable again.
                              */
-                            wait(60000);
+                            wait(6000);
                         } catch (InterruptedException e) {
                             running = false;
                         }

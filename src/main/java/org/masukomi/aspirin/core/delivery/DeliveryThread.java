@@ -142,7 +142,9 @@ public class DeliveryThread extends Thread {
         QueueInfo qInfo = dCtx.getQueueInfo();
         for (String handlerName : handlerList) {
             try {
-                deliveryManager.getDeliveryHandler(handlerName).handle(dCtx);
+                DeliveryHandler handler = deliveryManager.getDeliveryHandler(handlerName);
+                log.info("deliver using: " + handler.getClass());
+                handler.handle(dCtx);
             } catch (DeliveryException de) {
                 qInfo.setResultInfo(de.getMessage());
                 log.info("DeliveryThread ({}).deliver(): Mail delivery failed: {}. qi={}", new Object[]{getName(), qInfo.getResultInfo(), dCtx});
