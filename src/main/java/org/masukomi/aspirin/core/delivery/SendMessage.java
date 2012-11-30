@@ -13,11 +13,12 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
-import org.masukomi.aspirin.core.AspirinInternal;
 import org.masukomi.aspirin.core.store.queue.DeliveryState;
 
 import com.sun.mail.smtp.SMTPTransport;
-import org.masukomi.aspirin.core.Helper;
+import java.util.Date;
+import javax.mail.Address;
+import javax.mail.Message;
 import org.masukomi.aspirin.core.config.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,9 +69,18 @@ public class SendMessage implements DeliveryHandler {
                     transport = session.getTransport(outgoingMailServer);
                     try {
                         transport.connect();
-                        for( InternetAddress add : addr) {
+                        Address[] addresses = new Address[addr.length];
+                        int i=0;
+                        for (InternetAddress add : addr) {
                             log.info("sendMessage to: " + add.getAddress());
-                        }                        
+                            addresses[i++] = add;
+                        }
+                        Date now = new Date();
+                        message.setSentDate(now);
+                        System.out.println("recip: " + message.getRecipients(Message.RecipientType.TO));
+                        if( message.getRecipients(Message.RecipientType.TO) == null ) {
+                            message.setRecipients(Message.RecipientType.TO, addresses);
+                        }
                         transport.sendMessage(message, addr);
                         if (transport instanceof SMTPTransport) {
                             String response = ((SMTPTransport) transport).getLastServerResponse();
