@@ -102,7 +102,7 @@ public class SendMessage implements DeliveryHandler {
                                 continue;
                             }
                         } else {
-                            log.error("Exception sending message: " + message.getMessageID(), me);
+                            log.error("Exception sending message with messageId: " + message.getMessageID(), me);
                             throw me;
                         }
                     }
