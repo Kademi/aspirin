@@ -92,24 +92,7 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <configuration>
-                    <charset>utf-8</charset>
-                    <show>private</show>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>generate-javadoc-jar</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+            </plugin>            
 			
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
