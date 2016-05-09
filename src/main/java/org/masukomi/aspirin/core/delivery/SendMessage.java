@@ -41,7 +41,8 @@ public class SendMessage implements DeliveryHandler {
     public void handle(DeliveryContext dCtx) throws DeliveryException {
         // Collect sending informations
         Collection<URLName> targetServers = dCtx.getContextVariable("targetservers");
-        Session session = configuration.getMailSession();
+
+        Session session = configuration.newMailSession();
         MimeMessage message = dCtx.getMessage();
 
         // Prepare and send
@@ -56,13 +57,14 @@ public class SendMessage implements DeliveryHandler {
         while (!sentSuccessfully && urlnIt.hasNext()) {
             try {
                 URLName outgoingMailServer = urlnIt.next();
-                log.debug("SendMessage.handle(): Attempting delivery of '{}' to recipient '{}' on host '{}' ", new Object[]{dCtx.getQueueInfo().getMailid(), dCtx.getQueueInfo().getRecipient(), outgoingMailServer});
                 Properties props = session.getProperties();
                 if (message.getSender() == null) {
                     props.put("mail.smtp.from", "<>");
+                    log.debug("SendMessage.handle(): Attempting delivery of '{}' to recipient '{}' on host '{}' from unknown sender", new Object[]{dCtx.getQueueInfo().getMailid(), dCtx.getQueueInfo().getRecipient(), outgoingMailServer});
                 } else {
                     String sender = message.getSender().toString();
                     props.put("mail.smtp.from", sender);
+                    log.debug("SendMessage.handle(): Attempting delivery of '{}' to recipient '{}' on host '{}' from sender '{}'", new Object[]{dCtx.getQueueInfo().getMailid(), dCtx.getQueueInfo().getRecipient(), outgoingMailServer, sender});
                 }
                 Transport transport = null;
                 try {

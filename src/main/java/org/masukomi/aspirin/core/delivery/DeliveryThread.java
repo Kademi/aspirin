@@ -85,7 +85,7 @@ public class DeliveryThread extends Thread {
             try {
                 if (dCtx != null) {
                     log.trace("DeliveryThread ({}).run(): Call delivering... dCtx={}", new Object[]{getName(), dCtx});
-                    deliver(dCtx, configuration.getMailSession());
+                    deliver(dCtx, configuration.newMailSession());
                     deliveryManager.release(dCtx.getQueueInfo());
                     dCtx = null;
                 }
