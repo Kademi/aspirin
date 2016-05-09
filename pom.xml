@@ -5,9 +5,9 @@
 
     <groupId>io.milton</groupId> <!-- changed group to avoid confusion with real aspirin -->
     <artifactId>aspirin</artifactId>
-    <version>0.10.03.03</version> <!-- added version component so that we can see this is branched from 0.10.03 -->
-    <packaging>jar</packaging>    
-    <name>Aspirin</name>    
+    <version>0.10.03.04</version> <!-- added version component so that we can see this is branched from 0.10.03 -->
+    <packaging>jar</packaging>
+    <name>Aspirin</name>
     <description>Aspirin is an embeddable send-only SMTP server.</description>
     <distributionManagement>
         <repository>
@@ -20,7 +20,7 @@
             <url>http://milton.io/maven/</url>
         </snapshotRepository>
     </distributionManagement>
-    
+
     <developers>
         <developer>
             <name>Kate Rhodes</name>
@@ -30,7 +30,7 @@
         </developer>
         <developer>
             <name>Brad McEvoy (fork creator)</name>
-        </developer>        
+        </developer>
     </developers>
 
     <url>https://github.com/masukomi/aspirin</url>
@@ -92,8 +92,8 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>            
-			
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-repository-plugin</artifactId>
@@ -107,8 +107,8 @@
             </plugin>
         </plugins>
     </build>
-  
-	
+
+
     <dependencies>
 
         <!-- 3rd party -->
@@ -159,6 +159,6 @@
         </dependency>
 
     </dependencies>
-    
+
 
 </project>
