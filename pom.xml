@@ -11,8 +11,9 @@
     <description>Aspirin is an embeddable send-only SMTP server.</description>
     <distributionManagement>
         <repository>
-            <id>ettrema-repo</id>
-            <url>http://milton.io/maven/</url>
+            <id>bintray-milton-Milton</id>
+            <name>milton-Milton</name>
+            <url>https://api.bintray.com/maven/milton/Milton/milton/;publish=1</url>
         </repository>
         <snapshotRepository>
             <uniqueVersion>false</uniqueVersion>
@@ -160,5 +161,18 @@
 
     </dependencies>
 
-
+    <repositories>
+        <repository>
+            <id>milton-repo</id>
+            <url>http://milton.io/maven/</url>
+        </repository>
+        <repository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>bintray-milton-Milton</id>
+            <name>bintray</name>
+            <url>http://dl.bintray.com/milton/Milton</url>
+        </repository>
+    </repositories>
 </project>
