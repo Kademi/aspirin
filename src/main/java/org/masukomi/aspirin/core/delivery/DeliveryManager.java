@@ -71,12 +71,9 @@ public final class DeliveryManager extends Thread implements ConfigurationChange
         this.queueStore = queueStore;
         queueStore.init();
 
-        mailStore = configuration.getMailStore();
-        mailStore.init();
-
         // Set up deliveryhandlers
         // TODO create by configuration
-        deliveryHandlers.put(SendMessage.class.getCanonicalName(), new SendMessage(configuration));
+        deliveryHandlers.put(SendMessage.class.getCanonicalName(), new SendMessage(configuration, mailStore));
         deliveryHandlers.put(ResolveHost.class.getCanonicalName(), new ResolveHost());
 
         configuration.addListener(this);
@@ -116,15 +113,18 @@ public final class DeliveryManager extends Thread implements ConfigurationChange
             try {
                 qi = queueStore.next();
                 if (qi != null) {
-                    MimeMessage message = get(qi);
-                    if (message == null) {
-                        log.warn("No MimeMessage found for qi={}", qi);
-                        qi.setResultInfo("No MimeMessage found.");
-                        qi.setState(DeliveryState.FAILED);
-                        release(qi);
-                        continue;
-                    }
-                    DeliveryContext dCtx = new DeliveryContext().setQueueInfo(qi).setMessage(message);
+//                    MimeMessage message = get(qi);
+//                    if (message == null) {
+//                        log.warn("No MimeMessage found for qi={}", qi);
+//                        qi.setResultInfo("No MimeMessage found.");
+//                        qi.setState(DeliveryState.FAILED);
+//                        release(qi);
+//                        continue;
+//                    }
+                    
+                    //DeliveryContext dCtx = new DeliveryContext().setQueueInfo(qi).setMessage(message);
+                    DeliveryContext dCtx = new DeliveryContext().setQueueInfo(qi);
+                    
                     log.trace("DeliveryManager.run(): Pool state. A{}/I{}", new Object[]{deliveryThreadObjectPool.getNumActive(), deliveryThreadObjectPool.getNumIdle()});
                     try {
                         log.debug("DeliveryManager.run(): Start delivery. qi={}", qi);

@@ -24,14 +24,14 @@ public class DeliveryContext {
 		this.queueInfo = queueInfo;
 		return this;
 	}
-	private MimeMessage message;
-	public MimeMessage getMessage() {
-		return message;
-	}
-	public DeliveryContext setMessage(MimeMessage message) {
-		this.message = message;
-		return this;
-	}
+//	private MimeMessage message;
+//	public MimeMessage getMessage() {
+//		return message;
+//	}
+//	public DeliveryContext setMessage(MimeMessage message) {
+//		this.message = message;
+//		return this;
+//	}
 	private Session mailSession;
 	public Session getMailSession() {
 		return mailSession;

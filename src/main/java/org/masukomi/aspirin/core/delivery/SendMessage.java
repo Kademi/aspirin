@@ -20,6 +20,7 @@ import java.util.Date;
 import javax.mail.Address;
 import javax.mail.Message;
 import org.masukomi.aspirin.core.config.Configuration;
+import org.masukomi.aspirin.core.store.mail.MailStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,9 +33,11 @@ public class SendMessage implements DeliveryHandler {
 
     private static final Logger log = LoggerFactory.getLogger(SendMessage.class);
     private final Configuration configuration;
+    private final MailStore mailStore;
 
-    public SendMessage(Configuration configuration) {
+    public SendMessage(Configuration configuration, MailStore mailStore) {
         this.configuration = configuration;
+        this.mailStore = mailStore;
     }
 
     @Override
@@ -43,8 +46,14 @@ public class SendMessage implements DeliveryHandler {
         Collection<URLName> targetServers = dCtx.getContextVariable("targetservers");
 
         Session session = configuration.newMailSession();
-        MimeMessage message = dCtx.getMessage();
-
+        
+        //MimeMessage message = dCtx.getMessage();
+        MimeMessage message = mailStore.get(dCtx.getQueueInfo().getMailid());
+        if( message == null ) {
+            log.info("Got a null message");
+            return ;
+        }
+        
         // Prepare and send
         Iterator<URLName> urlnIt = targetServers.iterator();
         InternetAddress[] addr;
