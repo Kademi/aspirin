@@ -46,14 +46,14 @@ public class SendMessage implements DeliveryHandler {
         Collection<URLName> targetServers = dCtx.getContextVariable("targetservers");
 
         Session session = configuration.newMailSession();
-        
+
         //MimeMessage message = dCtx.getMessage();
         MimeMessage message = mailStore.get(dCtx.getQueueInfo().getMailid());
         if( message == null ) {
             log.info("Got a null message");
             return ;
         }
-        
+
         // Prepare and send
         Iterator<URLName> urlnIt = targetServers.iterator();
         InternetAddress[] addr;
@@ -88,7 +88,7 @@ public class SendMessage implements DeliveryHandler {
                         }
                         Date now = new Date();
                         message.setSentDate(now);
-                        System.out.println("recip: " + message.getRecipients(Message.RecipientType.TO));
+
                         if( message.getRecipients(Message.RecipientType.TO) == null ) {
                             message.setRecipients(Message.RecipientType.TO, addresses);
                         }
@@ -97,7 +97,6 @@ public class SendMessage implements DeliveryHandler {
                             String response = ((SMTPTransport) transport).getLastServerResponse();
                             if (response != null) {
                                 log.error("SendMessage.handle(): Last server response: {}.", response);
-                                System.out.println("server response: " + response);
                                 dCtx.getQueueInfo().setResultInfo(response);
                             }
                         }
@@ -128,7 +127,7 @@ public class SendMessage implements DeliveryHandler {
                 }
             } catch (MessagingException me) {
                 String exMessage = resolveException(me).getMessage();
-                System.out.println("SendMessage: messaging exception: " + exMessage);
+                log.warn("SendMessage: messaging exception: " + exMessage);
                 if ('5' == exMessage.charAt(0)) {
                     throw new DeliveryException(exMessage, true);
                 } else {
