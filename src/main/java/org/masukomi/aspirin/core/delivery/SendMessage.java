@@ -75,6 +75,7 @@ public class SendMessage implements DeliveryHandler {
                     props.put("mail.smtp.from", sender);
                     log.debug("SendMessage.handle(): Attempting delivery of '{}' to recipient '{}' on host '{}' from sender '{}'", new Object[]{dCtx.getQueueInfo().getMailid(), dCtx.getQueueInfo().getRecipient(), outgoingMailServer, sender});
                 }
+                long tm = System.currentTimeMillis();
                 Transport transport = null;
                 try {
                     transport = session.getTransport(outgoingMailServer);
@@ -116,7 +117,9 @@ public class SendMessage implements DeliveryHandler {
                             throw me;
                         }
                     }
-                    log.debug("SendMessage.handle(): Mail '{}' sent successfully to '{}'.", new Object[]{dCtx.getQueueInfo().getMailid(), outgoingMailServer});
+
+                    tm = System.currentTimeMillis() - tm;
+                    log.info("SendMessage.handle(): Mail '{}' sent successfully to '{}' duration={}ms", new Object[]{dCtx.getQueueInfo().getMailid(), outgoingMailServer, tm});
                     sentSuccessfully = true;
                     dCtx.addContextVariable("newstate", DeliveryState.SENT);
                 } finally {
