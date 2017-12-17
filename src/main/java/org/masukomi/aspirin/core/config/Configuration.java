@@ -394,6 +394,9 @@ public class Configuration implements ConfigurationMBean {
         mailSessionProps.put(MAIL_MIME_CHARSET, getEncoding()); //The mail.mime.charset System property can be used to specify the default MIME charset to use for encoded words and text parts that don't otherwise specify a charset. Normally, the default MIME charset is derived from the default Java charset, as specified in the file.encoding System property. Most applications will have no need to explicitly set the default MIME charset. In cases where the default MIME charset to be used for mail messages is different than the charset used for files stored on the system, this property should be set.
         mailSessionProps.put(MAIL_SMTP_CONNECTIONTIMEOUT, getDeliveryTimeout()); //Socket connection timeout value in milliseconds. Default is infinite timeout.
         mailSessionProps.put(MAIL_SMTP_TIMEOUT, getDeliveryTimeout()); //Socket I/O timeout value in milliseconds. Default is infinite timeout.
+
+        mailSessionProps.put("mail.smtp.starttls.enable", "true"); // BM: Lets give it a whirl!
+
         Session newSession = Session.getInstance(mailSessionProps);
 
         // Set communication debug
