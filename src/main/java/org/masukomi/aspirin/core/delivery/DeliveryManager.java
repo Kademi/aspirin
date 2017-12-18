@@ -67,7 +67,7 @@ public final class DeliveryManager extends Thread implements ConfigurationChange
         // Initialize object factory of pool
         deliveryThreadObjectFactory.init(new ThreadGroup("DeliveryThreadGroup"), deliveryThreadObjectPool);
 
-        // Set up stores and configuration listener 
+        // Set up stores and configuration listener
         this.queueStore = queueStore;
         queueStore.init();
 
@@ -121,10 +121,10 @@ public final class DeliveryManager extends Thread implements ConfigurationChange
 //                        release(qi);
 //                        continue;
 //                    }
-                    
+
                     //DeliveryContext dCtx = new DeliveryContext().setQueueInfo(qi).setMessage(message);
                     DeliveryContext dCtx = new DeliveryContext().setQueueInfo(qi);
-                    
+
                     log.trace("DeliveryManager.run(): Pool state. A{}/I{}", new Object[]{deliveryThreadObjectPool.getNumActive(), deliveryThreadObjectPool.getNumIdle()});
                     try {
                         log.debug("DeliveryManager.run(): Start delivery. qi={}", qi);
@@ -152,12 +152,13 @@ public final class DeliveryManager extends Thread implements ConfigurationChange
                          * no idle DeliveryThread is available.
                          */
                         log.debug("DeliveryManager.run(): No idle DeliveryThread is available: {}", nsee.getMessage());
+                        qi.setResultInfo("No delivery available, will try again");
                         release(qi);
                     } catch (Exception e) {
                         log.error("DeliveryManager.run(): Failed borrow delivery thread object.", e);
                         release(qi);
                     }
-                    
+
                 } else {
 //                    if (log.isTraceEnabled() && 0 < queueStore.size()) {
 //                        log.trace("DeliveryManager.run(): There is no sendable item in the queue. Fallback to waiting state for a minute.");

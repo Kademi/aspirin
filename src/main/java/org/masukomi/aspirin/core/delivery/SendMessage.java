@@ -93,20 +93,25 @@ public class SendMessage implements DeliveryHandler {
                         if( message.getRecipients(Message.RecipientType.TO) == null ) {
                             message.setRecipients(Message.RecipientType.TO, addresses);
                         }
+                        long nowMillis = System.currentTimeMillis();
                         transport.sendMessage(message, addr);
                         if (transport instanceof SMTPTransport) {
                             String response = ((SMTPTransport) transport).getLastServerResponse();
                             if (response != null) {
-                                log.error("SendMessage.handle(): Last server response: {}.", response);
+                                log.info("SendMessage.handle(): Last server response: {}.", response);
                                 dCtx.getQueueInfo().setResultInfo(response);
+                            } else {
+                                dCtx.getQueueInfo().setResultInfo("No server response after " + (System.currentTimeMillis()-nowMillis) + "ms connecting to " + outgoingMailServer);
                             }
+                        } else {
+                            dCtx.getQueueInfo().setResultInfo("Unknown transport: " + transport);
                         }
                     } catch (MessagingException me) {
                         /*
                          * Catch on connection error only.
                          */
                         if (resolveException(me) instanceof ConnectException) {
-                            log.error("SendMessage.handle(): Connection failed.", me);
+                            log.warn("SendMessage.handle(): Connection failed.", me);
                             if (!urlnIt.hasNext()) {
                                 throw me;
                             } else {

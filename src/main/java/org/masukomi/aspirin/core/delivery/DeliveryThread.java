@@ -53,7 +53,7 @@ public class DeliveryThread extends Thread {
         while (running) {
             synchronized (this) {
                 if (dCtx == null) {
-                    // Wait for next QueueInfo to deliver 
+                    // Wait for next QueueInfo to deliver
                     try {
                         if (running) {
                             log.trace("DeliveryThread ({}).run(): Wait for next sendable item.", getName());
@@ -86,6 +86,8 @@ public class DeliveryThread extends Thread {
                 if (dCtx != null) {
                     log.trace("DeliveryThread ({}).run(): Call delivering... dCtx={}", new Object[]{getName(), dCtx});
                     deliver(dCtx, configuration.newMailSession());
+
+                    // This is the normal workflow, when everything has worked nicely
                     deliveryManager.release(dCtx.getQueueInfo());
                     dCtx = null;
                 }
