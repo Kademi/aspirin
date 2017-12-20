@@ -28,12 +28,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.ParseException;
-
 import org.masukomi.aspirin.core.store.mail.MailStore;
 import org.masukomi.aspirin.core.store.mail.SimpleMailStore;
 import org.slf4j.Logger;
@@ -396,6 +394,8 @@ public class Configuration implements ConfigurationMBean {
         mailSessionProps.put(MAIL_SMTP_TIMEOUT, getDeliveryTimeout()); //Socket I/O timeout value in milliseconds. Default is infinite timeout.
 
         mailSessionProps.put("mail.smtp.starttls.enable", "true"); // BM: Lets give it a whirl!
+        mailSessionProps.put("mail.smtp.ssl.checkserveridentity", "false");
+        mailSessionProps.put("mail.smtp.ssl.trust", "*");
 
         Session newSession = Session.getInstance(mailSessionProps);
 
