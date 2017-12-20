@@ -395,7 +395,7 @@ public class Configuration implements ConfigurationMBean {
         mailSessionProps.put(MAIL_SMTP_CONNECTIONTIMEOUT, getDeliveryTimeout()); //Socket connection timeout value in milliseconds. Default is infinite timeout.
         mailSessionProps.put(MAIL_SMTP_TIMEOUT, getDeliveryTimeout()); //Socket I/O timeout value in milliseconds. Default is infinite timeout.
 
-        //mailSessionProps.put("mail.smtp.starttls.enable", "true"); // BM: Lets give it a whirl!
+        mailSessionProps.put("mail.smtp.starttls.enable", "true"); // BM: Lets give it a whirl!
 
         Session newSession = Session.getInstance(mailSessionProps);
 
