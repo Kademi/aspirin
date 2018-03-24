@@ -1,6 +1,7 @@
 package org.masukomi.aspirin.core.delivery;
 
 import java.lang.Thread.State;
+import java.util.WeakHashMap;
 
 import org.apache.commons.pool.BasePoolableObjectFactory;
 import org.apache.commons.pool.ObjectPool;
@@ -18,6 +19,8 @@ import org.slf4j.LoggerFactory;
 public class GenericPoolableDeliveryThreadFactory extends BasePoolableObjectFactory {
 
     private static final Logger log = LoggerFactory.getLogger(GenericPoolableDeliveryThreadFactory.class);
+    
+    static final WeakHashMap<DeliveryThread,Boolean> mapOfDeliveryThreads = new WeakHashMap<DeliveryThread, Boolean>();
     
     /**
      * This is the ThreadGroup of DeliveryThread objects. On shutdown it is
@@ -62,6 +65,7 @@ public class GenericPoolableDeliveryThreadFactory extends BasePoolableObjectFact
         }
         dThread.setParentObjectPool(myParentPool);
         log.trace("GenericPoolableDeliveryThreadFactory.makeObject(): New DeliveryThread object created: {}.", dThread.getName());
+        mapOfDeliveryThreads.put(dThread, Boolean.FALSE);
         return dThread;
     }
 

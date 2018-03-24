@@ -1,7 +1,9 @@
 package org.masukomi.aspirin.core.delivery;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -234,5 +236,13 @@ public final class DeliveryManager extends Thread implements ConfigurationChange
         } catch (Exception e) {
             log.error("DeliveryManager.shutdown() failed.", e);
         }
+    }
+    
+    public List<DeliveryThread> getDeliveryThreads() {
+        List list = new ArrayList();
+        for( DeliveryThread th : GenericPoolableDeliveryThreadFactory.mapOfDeliveryThreads.keySet() ) {
+            list.add(th);
+        }
+        return list;               
     }
 }

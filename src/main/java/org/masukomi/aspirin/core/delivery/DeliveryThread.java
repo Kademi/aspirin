@@ -134,36 +134,90 @@ public class DeliveryThread extends Thread {
             notify();
         }
     }
+    
+    private long numDelivered;
+    private DeliveryContext currentlyDelivering;
+    private Long timeLastStarted;
+    private Long timeLastCompleted;
+    private long lastDuration;
+    private long totalDuration;
+
+    public long getNumDelivered() {
+        return numDelivered;
+    }
+
+    public DeliveryContext getCurrentlyDelivering() {
+        return currentlyDelivering;
+    }
+
+    public String getCurrentlyDeliveringEmail() {
+        if( currentlyDelivering == null   ) {
+            return null;
+        } 
+        return currentlyDelivering.getQueueInfo().getRecipient();
+    }
+    
+    public Long getTimeLastStarted() {
+        return timeLastStarted;
+    }
+
+    public Long getTimeLastCompleted() {
+        return timeLastCompleted;
+    }
+
+    public long getLastDuration() {
+        return lastDuration;
+    }
+
+    public long getTotalDuration() {
+        return totalDuration;
+    }
+    
+    
+   
 
     private void deliver(DeliveryContext dCtx, Session session) {
         log.info("DeliveryThread ({}).deliver(): Starting mail delivery. qi={}", new Object[]{getName(), dCtx});
-        String[] handlerList = new String[]{
-            ResolveHost.class.getCanonicalName(),
-            SendMessage.class.getCanonicalName()
-        };
-        QueueInfo qInfo = dCtx.getQueueInfo();
-        for (String handlerName : handlerList) {
-            try {
-                DeliveryHandler handler = deliveryManager.getDeliveryHandler(handlerName);
-                log.info("deliver using: " + handler.getClass());
-                handler.handle(dCtx);
-            } catch (DeliveryException de) {
-                qInfo.setResultInfo(de.getMessage());
-                log.info("DeliveryThread ({}).deliver(): Mail delivery failed: {}. qi={}", new Object[]{getName(), qInfo.getResultInfo(), dCtx});
-                if (de.isPermanent()) {
-                    qInfo.setState(DeliveryState.FAILED);
-                } else {
-                    qInfo.setState(DeliveryState.QUEUED);
+        
+        numDelivered++;
+        currentlyDelivering = dCtx;
+        long tm = System.currentTimeMillis();
+        timeLastStarted = tm;
+        
+        try {
+            String[] handlerList = new String[]{
+                ResolveHost.class.getCanonicalName(),
+                SendMessage.class.getCanonicalName()
+            };
+            QueueInfo qInfo = dCtx.getQueueInfo();
+            for (String handlerName : handlerList) {
+                try {
+                    DeliveryHandler handler = deliveryManager.getDeliveryHandler(handlerName);
+                    log.info("deliver using: " + handler.getClass());
+                    handler.handle(dCtx);
+                } catch (DeliveryException de) {
+                    qInfo.setResultInfo(de.getMessage());
+                    log.info("DeliveryThread ({}).deliver(): Mail delivery failed: {}. qi={}", new Object[]{getName(), qInfo.getResultInfo(), dCtx});
+                    if (de.isPermanent()) {
+                        qInfo.setState(DeliveryState.FAILED);
+                    } else {
+                        qInfo.setState(DeliveryState.QUEUED);
+                    }
+                    return;
                 }
-                return;
             }
-        }
-        if (qInfo.hasState(DeliveryState.IN_PROGRESS)) {
-            if (qInfo.getResultInfo() == null) {
-                qInfo.setResultInfo("250 OK");
+            if (qInfo.hasState(DeliveryState.IN_PROGRESS)) {
+                if (qInfo.getResultInfo() == null) {
+                    qInfo.setResultInfo("250 OK");
+                }
+                log.info("DeliveryThread ({}).deliver(): Mail delivery success: {}. qi={}", new Object[]{getName(), qInfo.getResultInfo(), dCtx});
+                qInfo.setState(DeliveryState.SENT);
             }
-            log.info("DeliveryThread ({}).deliver(): Mail delivery success: {}. qi={}", new Object[]{getName(), qInfo.getResultInfo(), dCtx});
-            qInfo.setState(DeliveryState.SENT);
+        } finally {
+            long fin = System.currentTimeMillis();
+            lastDuration = fin - tm;
+            totalDuration += lastDuration;
+            timeLastCompleted = fin;
         }
     }
 }
