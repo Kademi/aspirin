@@ -110,17 +110,18 @@ public class SendMessage implements DeliveryHandler {
                         /*
                          * Catch on connection error only.
                          */
-                        if (resolveException(me) instanceof ConnectException) {
-                            log.warn("SendMessage.handle(): Connection failed.", me);
+//                        if (resolveException(me) instanceof ConnectException) {
+                            log.warn("SendMessage.handle(): Connection failed. ", me);
                             if (!urlnIt.hasNext()) {
                                 throw me;
                             } else {
+                                log.warn("SendMessage.handle(): Server failed, " + outgoingMailServer + " of " + targetServers.size() + ", trying next server for this recipient", me);
                                 continue;
                             }
-                        } else {
-                            log.error("Exception sending message with messageId: " + message.getMessageID(), me);
-                            throw me;
-                        }
+//                        } else {
+//                            log.error("Exception sending message with messageId: " + message.getMessageID(), me);
+//                            throw me;
+//                        }
                     }
 
                     tm = System.currentTimeMillis() - tm;
