@@ -1,6 +1,6 @@
 package org.masukomi.aspirin.core.delivery;
 
-import java.net.ConnectException;
+import com.sun.mail.smtp.SMTPTransport;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Properties;
@@ -15,7 +15,6 @@ import javax.mail.internet.MimeMessage;
 
 import org.masukomi.aspirin.core.store.queue.DeliveryState;
 
-import com.sun.mail.smtp.SMTPTransport;
 import java.util.Date;
 import javax.mail.Address;
 import javax.mail.Message;
@@ -94,6 +93,23 @@ public class SendMessage implements DeliveryHandler {
                             message.setRecipients(Message.RecipientType.TO, addresses);
                         }
                         long nowMillis = System.currentTimeMillis();
+//                        transport.addTransportListener(new TransportListener() {
+//
+//                            @Override
+//                            public void messageDelivered(TransportEvent te) {
+//                                log.info("messageDelivered {}", te);
+//                            }
+//
+//                            @Override
+//                            public void messageNotDelivered(TransportEvent te) {
+//                                log.info("messageDelivered {}", te);
+//                            }
+//
+//                            @Override
+//                            public void messagePartiallyDelivered(TransportEvent te) {
+//                                log.info("messagePartiallyDelivered {}", te);
+//                            }
+//                        });
                         transport.sendMessage(message, addr);
                         if (transport instanceof SMTPTransport) {
                             String response = ((SMTPTransport) transport).getLastServerResponse();
