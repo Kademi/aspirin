@@ -5,7 +5,7 @@
 
     <groupId>io.milton</groupId> <!-- changed group to avoid confusion with real aspirin -->
     <artifactId>aspirin</artifactId>
-    <version>0.10.03.09</version> <!-- added version component so that we can see this is branched from 0.10.03 -->
+    <version>0.10.03.10</version> <!-- added version component so that we can see this is branched from 0.10.03 -->
     <packaging>jar</packaging>
     <name>Aspirin</name>
     <description>Aspirin is an embeddable send-only SMTP server.</description>
@@ -47,7 +47,6 @@
         <javax.activation.version>1.1.1</javax.activation.version>
         <commons.pool.version>1.5.5</commons.pool.version>
         <dnsjava.version>2.0.8</dnsjava.version>
-        <javax.mail.version>1.4.2</javax.mail.version>
     </properties>
 
     <scm>
@@ -129,9 +128,9 @@
             <version>${dnsjava.version}</version>
         </dependency>
         <dependency>
-            <groupId>javax.mail</groupId>
-            <artifactId>mail</artifactId>
-            <version>${javax.mail.version}</version>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>javax.mail</artifactId>
+            <version>1.5.5</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
