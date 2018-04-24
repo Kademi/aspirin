@@ -5,7 +5,7 @@
 
     <groupId>io.milton</groupId> <!-- changed group to avoid confusion with real aspirin -->
     <artifactId>aspirin</artifactId>
-    <version>0.10.03.10</version> <!-- added version component so that we can see this is branched from 0.10.03 -->
+    <version>0.10.03.11</version> <!-- added version component so that we can see this is branched from 0.10.03 -->
     <packaging>jar</packaging>
     <name>Aspirin</name>
     <description>Aspirin is an embeddable send-only SMTP server.</description>
