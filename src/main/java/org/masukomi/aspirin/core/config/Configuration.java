@@ -366,8 +366,11 @@ public class Configuration implements ConfigurationMBean {
     public Session newMailSession() {
         // BM: Copy properties to avoid modifying the shared properties
         Properties props = mailSession.getProperties();
-        props = new Properties(props);
-        return Session.getInstance(props);
+        Properties props2 = new Properties();
+        for( Object s : props.keySet() ) {
+            props2.put(s, props.get(s));
+        }
+        return Session.getInstance(props2);
 
     }
 
