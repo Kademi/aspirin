@@ -38,14 +38,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * <p>This class represents the configuration of Aspirin. You can configure this
+ * <p>
+ * This class represents the configuration of Aspirin. You can configure this
  * software two ways:</p>
  *
  * <ol> <li>Get the configuration instance and set parameters.</li> <li>Get the
  * instance and initialize with a Properties object.</li> </ol>
  *
- * <p>There is a way to change behavior of Aspirin dinamically. You can use JMX
- * to change configuration parameters. In the parameters list we marked the
+ * <p>
+ * There is a way to change behavior of Aspirin dinamically. You can use JMX to
+ * change configuration parameters. In the parameters list we marked the
  * parameters which are applied immediately. For more informations view
  * {@link ConfigurationMBean}.</p>
  *
@@ -141,7 +143,6 @@ public class Configuration implements ConfigurationMBean {
     public Configuration(Properties props) {
         init(props);
     }
-
 
     /**
      * @return The email address of the postmaster in a MailAddress object.
@@ -367,7 +368,7 @@ public class Configuration implements ConfigurationMBean {
         // BM: Copy properties to avoid modifying the shared properties
         Properties props = mailSession.getProperties();
         Properties props2 = new Properties();
-        for( Object s : props.keySet() ) {
+        for (Object s : props.keySet()) {
             props2.put(s, props.get(s));
         }
         return Session.getInstance(props2);
@@ -397,8 +398,13 @@ public class Configuration implements ConfigurationMBean {
         mailSessionProps.put(MAIL_SMTP_TIMEOUT, getDeliveryTimeout()); //Socket I/O timeout value in milliseconds. Default is infinite timeout.
 
         mailSessionProps.put("mail.smtp.starttls.enable", "true");
+        mailSessionProps.put("mail.smtp.starttls.required", "true");
         mailSessionProps.put("mail.smtp.ssl.checkserveridentity", "false");
         mailSessionProps.put("mail.smtp.ssl.trust", "*");
+        //mailSessionProps.put("mail.smtp.ssl.ciphersuites", "SSL_RSA_WITH_RC4_128_MD5 SSL_RSA_WITH_RC4_128_SHA TLS_RSA_WITH_AES_128_CBC_SHA TLS_DHE_RSA_WITH_AES_128_CBC_SHA TLS_DHE_DSS_WITH_AES_128_CBC_SHA SSL_RSA_WITH_3DES_EDE_CBC_SHA SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA SSL_RSA_WITH_DES_CBC_SHA SSL_DHE_RSA_WITH_DES_CBC_SHA SSL_DHE_DSS_WITH_DES_CBC_SHA SSL_RSA_EXPORT_WITH_RC4_40_MD5 SSL_RSA_EXPORT_WITH_DES40_CBC_SHA SSL_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA SSL_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA TLS_EMPTY_RENEGOTIATION_INFO_SCSV");
+
+        // BM: Just for testing
+        mailSessionProps.put("mail.debug", "true");
 
         Session newSession = Session.getInstance(mailSessionProps);
 

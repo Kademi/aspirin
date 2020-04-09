@@ -22,6 +22,7 @@ public class QueueInfo {
     private DeliveryState state = DeliveryState.QUEUED;
     private transient boolean notifiedAlready = false;
     private transient String complexId = null;
+    private transient String logs;
 
     public QueueInfo(Configuration configuration, ListenerManager listenerManager) {
         this.configuration = configuration;
@@ -35,6 +36,16 @@ public class QueueInfo {
         return complexId;
     }
 
+    public String getLogs() {
+        return logs;
+    }
+
+    public void setLogs(String logs) {
+        this.logs = logs;
+    }
+
+    
+    
     public String getMailid() {
         return mailid;
     }

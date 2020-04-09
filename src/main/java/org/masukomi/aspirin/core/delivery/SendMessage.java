@@ -1,6 +1,8 @@
 package org.masukomi.aspirin.core.delivery;
 
 import com.sun.mail.smtp.SMTPTransport;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Properties;
@@ -48,9 +50,9 @@ public class SendMessage implements DeliveryHandler {
 
         //MimeMessage message = dCtx.getMessage();
         MimeMessage message = mailStore.get(dCtx.getQueueInfo().getMailid());
-        if( message == null ) {
+        if (message == null) {
             log.info("Got a null message");
-            return ;
+            return;
         }
 
         // Prepare and send
@@ -74,22 +76,27 @@ public class SendMessage implements DeliveryHandler {
                     props.put("mail.smtp.from", sender);
                     log.debug("SendMessage.handle(): Attempting delivery of '{}' to recipient '{}' on host '{}' from sender '{}'", new Object[]{dCtx.getQueueInfo().getMailid(), dCtx.getQueueInfo().getRecipient(), outgoingMailServer, sender});
                 }
+                session.setDebug(true); // BM: just for testing
+                ByteArrayOutputStream debugOut = new ByteArrayOutputStream();
+                PrintStream debugOutPs = new PrintStream(debugOut);
+                session.setDebugOut(debugOutPs);
                 long tm = System.currentTimeMillis();
                 Transport transport = null;
                 try {
                     transport = session.getTransport(outgoingMailServer);
+                    log.info("handle: using transport={} for outgoingMailServer={}, transport class=" + transport.getClass(), transport, outgoingMailServer);
                     try {
                         transport.connect();
                         Address[] addresses = new Address[addr.length];
-                        int i=0;
+                        int i = 0;
                         for (InternetAddress add : addr) {
-                            log.info("sendMessage to: " + add.getAddress());
+                            log.info("sendMessage to: {}", add.getAddress());
                             addresses[i++] = add;
                         }
                         Date now = new Date();
                         message.setSentDate(now);
 
-                        if( message.getRecipients(Message.RecipientType.TO) == null ) {
+                        if (message.getRecipients(Message.RecipientType.TO) == null) {
                             message.setRecipients(Message.RecipientType.TO, addresses);
                         }
                         long nowMillis = System.currentTimeMillis();
@@ -117,7 +124,7 @@ public class SendMessage implements DeliveryHandler {
                                 log.info("SendMessage.handle(): Last server response: {}.", response);
                                 dCtx.getQueueInfo().setResultInfo(response);
                             } else {
-                                dCtx.getQueueInfo().setResultInfo("No server response after " + (System.currentTimeMillis()-nowMillis) + "ms connecting to " + outgoingMailServer);
+                                dCtx.getQueueInfo().setResultInfo("No server response after " + (System.currentTimeMillis() - nowMillis) + "ms connecting to " + outgoingMailServer);
                             }
                         } else {
                             dCtx.getQueueInfo().setResultInfo("Unknown transport: " + transport);
@@ -127,13 +134,13 @@ public class SendMessage implements DeliveryHandler {
                          * Catch on connection error only.
                          */
 //                        if (resolveException(me) instanceof ConnectException) {
-                            log.warn("SendMessage.handle(): Connection failed. ", me);
-                            if (!urlnIt.hasNext()) {
-                                throw me;
-                            } else {
-                                log.warn("SendMessage.handle(): Server failed, " + outgoingMailServer + " of " + targetServers.size() + ", trying next server for this recipient", me);
-                                continue;
-                            }
+                        log.warn("SendMessage.handle(): Connection failed. ", me);
+                        if (!urlnIt.hasNext()) {
+                            throw me;
+                        } else {
+                            log.warn("SendMessage.handle(): Server failed, " + outgoingMailServer + " of " + targetServers.size() + ", trying next server for this recipient", me);
+                            continue;
+                        }
 //                        } else {
 //                            log.error("Exception sending message with messageId: " + message.getMessageID(), me);
 //                            throw me;
@@ -149,6 +156,10 @@ public class SendMessage implements DeliveryHandler {
                         transport.close();
                         transport = null;
                     }
+
+                    String debug = debugOut.toString();
+                    dCtx.getQueueInfo().setLogs(debug);
+                    log.info("SendMessage.handle(): debug results: {}", debug);
                 }
             } catch (MessagingException me) {
                 String exMessage = resolveException(me).getMessage();
