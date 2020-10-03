@@ -159,7 +159,7 @@ public class SendMessage implements DeliveryHandler {
 
                     String debug = debugOut.toString();
                     dCtx.getQueueInfo().setLogs(debug);
-                    log.info("SendMessage.handle(): debug results: {}", debug);
+                    //log.info("SendMessage.handle(): debug results: {}", debug);
                 }
             } catch (MessagingException me) {
                 String exMessage = resolveException(me).getMessage();
