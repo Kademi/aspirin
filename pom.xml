@@ -11,9 +11,9 @@
     <description>Aspirin is an embeddable send-only SMTP server.</description>
     <distributionManagement>
         <repository>
-            <id>bintray-milton-Milton</id>
-            <name>milton-Milton</name>
-            <url>https://api.bintray.com/maven/kademi/kademi-public/aspirin/;publish=1</url>
+            <id>central</id>
+            <name>a0glkgfeusb7f-artifactory-primary-0-releases</name>
+            <url>https://kademi.jfrog.io/artifactory/kademi-libs-release-local</url>
         </repository>
     </distributionManagement>
 
